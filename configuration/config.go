@@ -12,6 +12,7 @@ type BodylessProjectConfig struct {
 	BucketName string
 	Region string
 	Profile string
+	CognitoConfig constants.PROJECT_CONF_TEMPLATE_VARS
 }
 
 
@@ -19,8 +20,12 @@ func WriteConfig(
 	bucketName string,
 	awsRegion string,
 	awsProfile string,
-	fileName string) {
-	bodylessProjectConfig := BodylessProjectConfig{BucketName:bucketName, Region:awsRegion, Profile:awsProfile}
+	fileName string,
+	cognitoConfig constants.PROJECT_CONF_TEMPLATE_VARS) {
+	bodylessProjectConfig := BodylessProjectConfig{BucketName:bucketName,
+		Region:awsRegion,
+		Profile:awsProfile,
+		CognitoConfig:cognitoConfig}
 
 	b, jsonErr := json.Marshal(bodylessProjectConfig)
 

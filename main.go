@@ -85,13 +85,6 @@ func init() {
 	deployCommand = flag.NewFlagSet("deploy", flag.ExitOnError)
 }
 
-func printUsage() {
-	if len(os.Args) == 1 {
-		fmt.Println("usage: bodyless <command> [<args>]")
-		return
-	}
-	os.Exit(1)
-}
 
 func printDefaults(command *flag.FlagSet) {
 	command.PrintDefaults()

@@ -27,14 +27,17 @@ func CreateProj(projectName string,
 	fmt.Println("repo cloned.")
 
 	// create-project Code Bucket
-	aws.CreateBucket(codeBucket, region)
-	aws.SetWebSiteConfig(codeBucket, constants.S3_INDEX_PAGE, constants.S3_INDEX_PAGE, region)
+	aws.CreateBucket(codeBucket, &region)
+	aws.SetWebSiteConfig(codeBucket, constants.S3_INDEX_PAGE, constants.S3_INDEX_PAGE, &region)
+
+	// create cognito resources.
+	cognitoConfig := aws.CreateCognitoResources(constants.COGNITO_POOL_NAME, &path, &region)
 
 	// create configuration files.
 	fmt.Println("writing configuraton...")
 	path += "/"+constants.CONFIG_DIR
 	os.Mkdir(path, constants.CONFIG_FILE_PERMISSIONS);
 	filePath := path+"/"+constants.CONFIG_FILE_NAME
-	configuration.WriteConfig(codeBucket, region, profile, filePath)
+	configuration.WriteConfig(codeBucket, region, profile, filePath,cognitoConfig)
 	fmt.Println("writing configuration is completed.")
 }

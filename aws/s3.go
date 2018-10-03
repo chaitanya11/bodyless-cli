@@ -13,14 +13,15 @@ import (
 
 // aws s3
 func CreateBucket(bucketName string,
-	region string) {
+	region *string) {
 	svc := s3.New(session.New(&aws.Config{
 		Region: aws.String(endpoints.UsWest2RegionID),
 	}))
+	// TODO add versioning.
 	input := &s3.CreateBucketInput{
 		Bucket: aws.String(bucketName),
 		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
-			LocationConstraint: aws.String(region),
+			LocationConstraint: region,
 		},
 	}
 
@@ -47,9 +48,9 @@ func CreateBucket(bucketName string,
 	fmt.Println(result)
 }
 
-func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string, region string) {
+func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string, region *string) {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region)},
+		Region: region},
 	)
 
 	// Create S3 service client
