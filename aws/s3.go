@@ -1,4 +1,4 @@
-package s3
+package aws
 
 import (
 	"fmt"
@@ -8,13 +8,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 )
 
-var region = "us-west-2"
-
 // aws s3
-func CreateBucket(bucketName string) {
-	svc := s3.New(session.New())
+func CreateBucket(bucketName string,
+	region string) {
+	svc := s3.New(session.New(&aws.Config{
+		Region: aws.String(endpoints.UsWest2RegionID),
+	}))
 	input := &s3.CreateBucketInput{
 		Bucket: aws.String(bucketName),
 		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
@@ -38,13 +40,14 @@ func CreateBucket(bucketName string) {
 			// Message from an error.
 			fmt.Println(err.Error())
 		}
+		os.Exit(1)
 		return
 	}
 
 	fmt.Println(result)
 }
 
-func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string) {
+func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string, region string) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(region)},
 	)
