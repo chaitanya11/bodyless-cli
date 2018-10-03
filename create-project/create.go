@@ -2,11 +2,11 @@ package create_project
 
 import (
 	"bodyless-cli/git"
-	"fmt"
 	"os"
 	"bodyless-cli/configuration"
 	"bodyless-cli/constants"
 	"bodyless-cli/aws"
+	"log"
 )
 
 func CreateProj(projectName string,
@@ -18,13 +18,13 @@ func CreateProj(projectName string,
 	os.Setenv(constants.PROFILE_ENV_KEY, profile)
 
 	// clone cms repo in to path
-	fmt.Println("creating project...")
+	log.Println("creating project...")
 	path += projectName
 	//cleaning given path
 	os.RemoveAll(path)
-	fmt.Println("cloneing to repo in to "+path)
+	log.Println("cloneing to repo in to "+path)
 	git.PullGitRepo(constants.REPO, path)
-	fmt.Println("repo cloned.")
+	log.Println("repo cloned.")
 
 	// create-project Code Bucket
 	aws.CreateBucket(codeBucket, &region)
@@ -34,10 +34,10 @@ func CreateProj(projectName string,
 	cognitoConfig := aws.CreateCognitoResources(constants.COGNITO_POOL_NAME, &path, &region)
 
 	// create configuration files.
-	fmt.Println("writing configuraton...")
+	log.Println("writing repo configuraton...")
 	path += "/"+constants.CONFIG_DIR
 	os.Mkdir(path, constants.CONFIG_FILE_PERMISSIONS);
 	filePath := path+"/"+constants.CONFIG_FILE_NAME
 	configuration.WriteConfig(codeBucket, region, profile, filePath,cognitoConfig)
-	fmt.Println("writing configuration is completed.")
+	log.Println("writing repo configuration is completed.")
 }

@@ -9,9 +9,52 @@ const S3_INDEX_PAGE = "index.html"
 
 // aws
 const PROFILE_ENV_KEY = "AWS_PROFILE"
-const COGNITO_PROVIDER_PREFIX = "cognito-idp.us-east-1.amazonaws.com/"
+const COGNITO_PROVIDER_PREFIX_TEMPLATE = "cognito-idp.{{.AwsRegion}}.amazonaws.com/"
 const COGNITO_POOL_NAME = "bodyless_pool"
 
+type ROLE_TEMPLATE_STRUCTURE struct {
+	IdentityPoolId string
+}
+const AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
+	"Version": "2012-10-17",
+	"Statement": [{
+		"Effect": "Allow",
+		"Principal": {
+			"Federated": "cognito-identity.amazonaws.com"
+		},
+		"Action": "sts:AssumeRoleWithWebIdentity",
+		"Condition": {
+			"StringEquals": {
+				"cognito-identity.amazonaws.com:aud": "{{.IdentityPoolId}}"
+			},
+			"ForAnyValue:StringLike": {
+				"cognito-identity.amazonaws.com:amr": "authenticated"
+			}
+		}
+	}]
+}`
+const AUTHENTICATED_USER_ROLE_POLICY_NAME = "Cognito_bodylesscms_identity_poolAuth_Role"
+const AUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION = "This role is applied for authenticated users from cognito."
+const UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
+	"Version": "2012-10-17",
+	"Statement": [{
+		"Effect": "Allow",
+		"Principal": {
+			"Federated": "cognito-identity.amazonaws.com"
+		},
+		"Action": "sts:AssumeRoleWithWebIdentity",
+		"Condition": {
+			"StringEquals": {
+				"cognito-identity.amazonaws.com:aud": "{{.IdentityPoolId}}"
+			},
+			"ForAnyValue:StringLike": {
+				"cognito-identity.amazonaws.com:amr": "unauthenticated"
+			}
+		}
+	}]
+}`
+const UNAUTHENTICATED_USER_ROLE_POLICY_NAME = "Cognito_bodylesscms_identity_poolUnauth_Role"
+const UNAUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION = "This role is applied for unAuthenticated users from cognito."
 
 // templates
 const PROJECT_CONF_TEMPLATE = `
@@ -27,6 +70,8 @@ type PROJECT_CONF_TEMPLATE_VARS struct {
 	ClientId string
 	IdentityPoolId string
 	AwsRegion string
+	ValidRoleArn string
+	InValidRoleArn string
 }
 
 

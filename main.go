@@ -21,7 +21,7 @@ var (
 )
 
 func main() {
-
+	// TODO add remove resources command to remove all created aws resources.
 	commands := []*flag.FlagSet{
 		createCommand,
 		buildCommand,
