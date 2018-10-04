@@ -88,11 +88,12 @@ func createIamRoles(region *string, identityPoolId *string) (*string, *string) {
 		Region: region,
 	}))
 	log.Println("Creating roles for identity pool ...")
+	projectVars := constants.PROJECT_CONF_TEMPLATE_VARS{
+		IdentityPoolId: *identityPoolId,
+	}
 	// valid role.
 	validUserRoleDoc := utils.GetStringFromTemplate(constants.AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
-		constants.PROJECT_CONF_TEMPLATE_VARS{
-			IdentityPoolId: *identityPoolId,
-		})
+		projectVars)
 	validUserROleName := constants.AUTHENTICATED_USER_ROLE_POLICY_NAME
 	validUserROleDes := constants.AUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION
 	createValidUserRoleInput := iam.CreateRoleInput{
@@ -106,9 +107,7 @@ func createIamRoles(region *string, identityPoolId *string) (*string, *string) {
 
 	// invalid role.
 	inValidUserRoleDoc := utils.GetStringFromTemplate(constants.UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
-		constants.PROJECT_CONF_TEMPLATE_VARS{
-			IdentityPoolId: *identityPoolId,
-		})
+		projectVars)
 	inValidUserROleName := constants.UNAUTHENTICATED_USER_ROLE_POLICY_NAME
 	inValidUserROleDes := constants.UNAUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION
 

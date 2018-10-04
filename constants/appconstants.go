@@ -11,10 +11,20 @@ const S3_INDEX_PAGE = "index.html"
 const PROFILE_ENV_KEY = "AWS_PROFILE"
 const COGNITO_PROVIDER_PREFIX_TEMPLATE = "cognito-idp.{{.AwsRegion}}.amazonaws.com/"
 const COGNITO_POOL_NAME = "bodyless_pool"
+const AUTHENTICATED_USER_ROLE_POLICY_NAME = "Cognito_bodylesscms_identity_poolAuth_Role"
+const AUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION = "This role is applied for authenticated users from cognito."
+const UNAUTHENTICATED_USER_ROLE_POLICY_NAME = "Cognito_bodylesscms_identity_poolUnauth_Role"
+const UNAUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION = "This role is applied for unAuthenticated users from cognito."
 
-type ROLE_TEMPLATE_STRUCTURE struct {
-	IdentityPoolId string
+// templates
+const PROJECT_CONF_TEMPLATE = `
+export class Config {
+    public static readonly userPoolId= '{{.UserPoolId}}';
+    public static readonly clientId = '{{.ClientId}}';
+    public static readonly identityPoolId = '{{.IdentityPoolId}}';
+    public static readonly awsRegion = '{{.AwsRegion}}';
 }
+`
 const AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
 	"Version": "2012-10-17",
 	"Statement": [{
@@ -33,8 +43,6 @@ const AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
 		}
 	}]
 }`
-const AUTHENTICATED_USER_ROLE_POLICY_NAME = "Cognito_bodylesscms_identity_poolAuth_Role"
-const AUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION = "This role is applied for authenticated users from cognito."
 const UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
 	"Version": "2012-10-17",
 	"Statement": [{
@@ -53,18 +61,8 @@ const UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
 		}
 	}]
 }`
-const UNAUTHENTICATED_USER_ROLE_POLICY_NAME = "Cognito_bodylesscms_identity_poolUnauth_Role"
-const UNAUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION = "This role is applied for unAuthenticated users from cognito."
 
-// templates
-const PROJECT_CONF_TEMPLATE = `
-export class Config {
-    public static readonly userPoolId= '{{.UserPoolId}}';
-    public static readonly clientId = '{{.ClientId}}';
-    public static readonly identityPoolId = '{{.IdentityPoolId}}';
-    public static readonly awsRegion = '{{.AwsRegion}}';
-}
-`
+// structs
 type PROJECT_CONF_TEMPLATE_VARS struct {
 	UserPoolId string
 	ClientId string

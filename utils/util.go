@@ -45,19 +45,6 @@ func WriteProjectConfig(userPoolId *string,
 }
 
 
-func GetRoleFromTemplate(identityPoolId *string, templateValue string) string {
-	log.Println("Resolving role template")
-	var data bytes.Buffer
-	temp := template.New("roleTemplate")
-	roleStruct := constants.ROLE_TEMPLATE_STRUCTURE{IdentityPoolId: *identityPoolId}
-	temp, err := temp.Parse(templateValue)
-	CheckNExitError(err)
-	exeErr := temp.Execute(&data, roleStruct)
-	CheckNExitError(exeErr)
-	log.Println("Rosolved role template")
-	return data.String()
-}
-
 func GetStringFromTemplate(templateValue string, strcuture interface{}) string{
 	log.Println("Resolving template")
 	var data bytes.Buffer
