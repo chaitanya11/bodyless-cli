@@ -3,9 +3,9 @@ package configuration
 import (
 	"encoding/json"
 	"os"
-	"fmt"
 	"io/ioutil"
 	"bodyless-cli/constants"
+	"bodyless-cli/utils"
 )
 
 type BodylessProjectConfig struct {
@@ -29,12 +29,12 @@ func WriteConfig(
 
 	b, jsonErr := json.Marshal(bodylessProjectConfig)
 
-	checkNExitOnError(jsonErr)
+	utils.CheckNExitError(jsonErr)
 
 	// write data to file
 	fileWriteErr := ioutil.WriteFile(fileName, b, constants.CONFIG_FILE_PERMISSIONS);
 
-	checkNExitOnError(fileWriteErr)
+	utils.CheckNExitError(fileWriteErr)
 }
 
 func ReadConfig() BodylessProjectConfig {
@@ -43,14 +43,6 @@ func ReadConfig() BodylessProjectConfig {
 	decoder := json.NewDecoder(file)
 	bodylessProjectConfig := BodylessProjectConfig{}
 	err := decoder.Decode(&bodylessProjectConfig)
-	checkNExitOnError(err)
+	utils.CheckNExitError(err)
 	return bodylessProjectConfig
-}
-
-
-func checkNExitOnError(err error) {
-	if err != nil {
-		fmt.Println(err);
-		os.Exit(1);
-	}
 }

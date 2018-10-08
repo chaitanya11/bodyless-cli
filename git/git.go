@@ -5,6 +5,7 @@ import (
 	"os"
 
 	git "gopkg.in/src-d/go-git.v4"
+	"log"
 )
 
 // git
@@ -27,7 +28,7 @@ func PullGitRepo(url string, directory string) {
 	commit, err := r.CommitObject(ref.Hash())
 	checkIfError(err)
 
-	fmt.Println(commit)
+	log.Println(commit)
 }
 
 // CheckIfError should be used to naively panics if an error is not nil.
@@ -36,16 +37,16 @@ func checkIfError(err error) {
 		return
 	}
 
-	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
+	log.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
 	os.Exit(1)
 }
 
 // Info should be used to describe the example commands that are about to run.
 func Info(format string, args ...interface{}) {
-	fmt.Printf("\x1b[34;1m%s\x1b[0m\n", fmt.Sprintf(format, args...))
+	log.Printf("\x1b[34;1m%s\x1b[0m\n", fmt.Sprintf(format, args...))
 }
 
 // Warning should be used to display a warning
 func Warning(format string, args ...interface{}) {
-	fmt.Printf("\x1b[36;1m%s\x1b[0m\n", fmt.Sprintf(format, args...))
+	log.Printf("\x1b[36;1m%s\x1b[0m\n", fmt.Sprintf(format, args...))
 }
