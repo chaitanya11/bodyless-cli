@@ -92,10 +92,10 @@ func createIamRoles(region *string, identityPoolId *string) (*string, *string) {
 		IdentityPoolId: *identityPoolId,
 	}
 	// valid role.
-	validUserRoleDoc := utils.GetStringFromTemplate(constants.AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
+	validUserRoleDoc := utils.GetStringFromTemplate(constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_TEMPLATE,
 		projectVars)
-	validUserROleName := constants.AUTHENTICATED_USER_ROLE_POLICY_NAME
-	validUserROleDes := constants.AUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION
+	validUserROleName := constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME
+	validUserROleDes := constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_DESCRIPTION
 	createValidUserRoleInput := iam.CreateRoleInput{
 		AssumeRolePolicyDocument: &validUserRoleDoc,
 		RoleName: &validUserROleName,
@@ -106,10 +106,10 @@ func createIamRoles(region *string, identityPoolId *string) (*string, *string) {
 	log.Printf("Created role for valid users, role arn %s", *validUserRoleArn)
 
 	// invalid role.
-	inValidUserRoleDoc := utils.GetStringFromTemplate(constants.UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
+	inValidUserRoleDoc := utils.GetStringFromTemplate(constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_TEMPLATE,
 		projectVars)
-	inValidUserROleName := constants.UNAUTHENTICATED_USER_ROLE_POLICY_NAME
-	inValidUserROleDes := constants.UNAUTHENTICATED_USER_ROLE_POLICY_DESCRIPTION
+	inValidUserROleName := constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME
+	inValidUserROleDes := constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_DESCRIPTION
 
 	createinValidUserRoleInput := iam.CreateRoleInput{
 		AssumeRolePolicyDocument: &inValidUserRoleDoc,
@@ -119,7 +119,38 @@ func createIamRoles(region *string, identityPoolId *string) (*string, *string) {
 	utils.CheckNExitError(createinValidUserRoleErr)
 	inValidUserRoleArn := createRoleOut.Role.Arn
 	log.Printf("Created role for invalid users, role arn %s", *inValidUserRoleArn)
+
+	// Adding policies to rolesAttaching roles to identity pool
+	attachPolicy(constants.AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
+		region,
+		constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME,
+		constants.AUTHENTICATED_USER_ROLE_POLICY_NAME)
+	attachPolicy(constants.UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
+		region,
+		constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME,
+		constants.UNAUTHENTICATED_USER_ROLE_POLICY_NAME)
 	return validUserRoleArn, inValidUserRoleArn
+}
+
+
+func attachPolicy(
+	policyTemplate string,
+	region *string,
+	roleName string,
+	policyName string) *iam.PutRolePolicyOutput {
+	log.Printf("Creating policy document for role %s ...", roleName)
+	svc := iam.New(session.New(&aws.Config{
+		Region: region,
+	}))
+
+	policyInput := iam.PutRolePolicyInput{RoleName: &roleName,
+	PolicyDocument: &policyTemplate,
+	PolicyName: &policyName,
+	}
+	PutRolePolicyOutput, error := svc.PutRolePolicy(&policyInput)
+	utils.CheckNExitError(error)
+	log.Printf("Created policy document for role %s ...", roleName)
+	return PutRolePolicyOutput
 }
 
 func CreateCognitoResources(poolName string, path *string, region *string) constants.PROJECT_CONF_TEMPLATE_VARS {
