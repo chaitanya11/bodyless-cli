@@ -21,7 +21,7 @@ var (
 )
 
 func main() {
-
+	// TODO add remove resources command to remove all created aws resources.
 	commands := []*flag.FlagSet{
 		createCommand,
 		buildCommand,
@@ -76,7 +76,7 @@ func init() {
 	createCommand.StringVarP(&path, "Path", "P", ".", "Project Location.")
 	createCommand.StringVarP(&codeBucket, "CodeBucketName", "w", "", "Name of the bucket where website code is deployed.")
 	createCommand.StringVarP(&profile, "profile", "p", "default", "Name of the aws profile configured.")
-	createCommand.StringVarP(&region, "region", "r", "us-west-2", "Name of the aws region.")
+	createCommand.StringVarP(&region, "region", "r", "us-east-1", "Name of the aws region.")
 
 	// build command
 	buildCommand = flag.NewFlagSet("build", flag.ExitOnError)

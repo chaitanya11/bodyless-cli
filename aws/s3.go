@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
+	"log"
 )
 
 // aws s3
@@ -30,22 +31,22 @@ func CreateBucket(bucketName string,
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case s3.ErrCodeBucketAlreadyExists:
-				fmt.Println(s3.ErrCodeBucketAlreadyExists, aerr.Error())
+				log.Println(s3.ErrCodeBucketAlreadyExists, aerr.Error())
 			case s3.ErrCodeBucketAlreadyOwnedByYou:
-				fmt.Println(s3.ErrCodeBucketAlreadyOwnedByYou, aerr.Error())
+				log.Println(s3.ErrCodeBucketAlreadyOwnedByYou, aerr.Error())
 			default:
-				fmt.Println(aerr.Error())
+				log.Println(aerr.Error())
 			}
 		} else {
 			// Print the error, cast err to awserr.Error to get the Code and
 			// Message from an error.
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 		}
 		os.Exit(1)
 		return
 	}
 
-	fmt.Println(result)
+	log.Println(result)
 }
 
 func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string, region *string) {
@@ -73,7 +74,7 @@ func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string, r
 			bucketName, err)
 	}
 
-	fmt.Printf("Successfully set bucket %q website configuration\n", bucketName)
+	log.Printf("Successfully set bucket %q website configuration\n", bucketName)
 
 }
 
