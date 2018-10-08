@@ -67,7 +67,6 @@ func createIdentityPool(poolName string, clientId *string, userPoolId string, re
 	IdentityPool, createPoolErr := CognitoIdentity.CreateIdentityPool(&createIdentityPoolInput)
 	utils.CheckNExitError(createPoolErr)
 	log.Printf("Created cognito identity pool, identity pool id %s", *IdentityPool.IdentityPoolId)
-	// TODO set roles with permissions for identity pool.
 	// get roles arns
 	validRole, invalidRole := createIamRoles(region, IdentityPool.IdentityPoolId);
 	log.Println("Attaching roles to identity pool ....")
