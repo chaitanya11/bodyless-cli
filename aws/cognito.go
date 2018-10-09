@@ -152,16 +152,49 @@ func attachPolicy(
 	return PutRolePolicyOutput
 }
 
-func CreateCognitoResources(poolName string, path *string, region *string) constants.PROJECT_CONF_TEMPLATE_VARS {
+func createUser(region *string, userName string, password string, email string, userPoolId *string, clientId *string) {
+	log.Println("Creating user in cognito pool ...")
+	CognitoSvc := cognitoidentityprovider.New(session.New(&aws.Config{
+		Region: region,
+	}))
+	attributeList := []*cognitoidentityprovider.AttributeType{
+		&cognitoidentityprovider.AttributeType{
+			Name: aws.String("email"),
+			Value: &email,
+		},
+	}
+	_, userCreateErr := CognitoSvc.SignUp(&cognitoidentityprovider.SignUpInput{
+		Username: &userName,
+		Password: &password,
+		UserAttributes: attributeList,
+		ClientId: clientId,
+	})
+	utils.CheckNExitError(userCreateErr)
+	log.Printf("User created with details, username : %s, password: %s, email: %s.",
+		userName, password, email)
+	log.Println("Use username and password to login to application.")
+
+	// confirm created user.
+	_, userCnfmErr := CognitoSvc.AdminConfirmSignUp(&cognitoidentityprovider.AdminConfirmSignUpInput{
+		Username: &userName,
+		UserPoolId: userPoolId,
+	})
+	utils.CheckNExitError(userCnfmErr)
+}
+
+func CreateCognitoResources(poolName string, path *string, region *string, bucketName *string) constants.PROJECT_CONF_TEMPLATE_VARS {
 	log.Println("Creating cognito resources ...")
 	userPoolId := createCognitoUserPool(poolName, region)
 	// create user pool client.
 	createUserPoolClientOutput := createUserPoolClient(poolName, userPoolId, region)
 	clientId := createUserPoolClientOutput.UserPoolClient.ClientId
 	IdentityPoolId, validRoleArn, inValidRoleArn := createIdentityPool(poolName, clientId, *userPoolId, region)
+	// creating user in cognito pool.
+	createUser(region, "bodyless", "Hello@1234", "bodylesscms@mailinator.com", userPoolId, clientId)
+
 	// write to config file of project.
 	log.Println("Writing project configuration ...")
-	cognitoConfig := utils.WriteProjectConfig(userPoolId, clientId, IdentityPoolId, region, path,
+	cognitoConfig := utils.WriteProjectConfig(bucketName, userPoolId, clientId, IdentityPoolId, region, path,
 		validRoleArn, inValidRoleArn)
 	return cognitoConfig
 }
