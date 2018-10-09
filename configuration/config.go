@@ -8,12 +8,7 @@ import (
 	"bodyless-cli/utils"
 )
 
-type BodylessProjectConfig struct {
-	BucketName string
-	Region string
-	Profile string
-	CognitoConfig constants.PROJECT_CONF_TEMPLATE_VARS
-}
+
 
 
 func WriteConfig(
@@ -22,7 +17,7 @@ func WriteConfig(
 	awsProfile string,
 	fileName string,
 	cognitoConfig constants.PROJECT_CONF_TEMPLATE_VARS) {
-	bodylessProjectConfig := BodylessProjectConfig{BucketName:bucketName,
+	bodylessProjectConfig := constants.BodylessProjectConfig{BucketName:bucketName,
 		Region:awsRegion,
 		Profile:awsProfile,
 		CognitoConfig:cognitoConfig}
@@ -37,11 +32,11 @@ func WriteConfig(
 	utils.CheckNExitError(fileWriteErr)
 }
 
-func ReadConfig() BodylessProjectConfig {
+func ReadConfig() constants.BodylessProjectConfig {
 	file, _ := os.Open(constants.CONFIG_DIR + "/" + constants.CONFIG_FILE_NAME)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	bodylessProjectConfig := BodylessProjectConfig{}
+	bodylessProjectConfig := constants.BodylessProjectConfig{}
 	err := decoder.Decode(&bodylessProjectConfig)
 	utils.CheckNExitError(err)
 	return bodylessProjectConfig

@@ -7,6 +7,7 @@ import (
 	flag "github.com/ogier/pflag"
 	"bodyless-cli/deploy-project"
 	"bodyless-cli/build-project"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 )
 
 var (
@@ -46,12 +47,12 @@ func main() {
 
 	case "build":
 		buildCommand.Parse(os.Args[2:])
-		build_project.BuildProj()
+		build_project.BuildProj(path)
 
 	case "deploy":
 		deployCommand.Parse(os.Args[2:])
 		// build project.
-		build_project.BuildProj()
+		build_project.BuildProj(path)
 		// deploy project.
 		deploy_project.DeployProj()
 
@@ -76,13 +77,15 @@ func init() {
 	createCommand.StringVarP(&path, "Path", "P", ".", "Project Location.")
 	createCommand.StringVarP(&codeBucket, "CodeBucketName", "w", "", "Name of the bucket where website code is deployed.")
 	createCommand.StringVarP(&profile, "profile", "p", "default", "Name of the aws profile configured.")
-	createCommand.StringVarP(&region, "region", "r", "us-east-1", "Name of the aws region.")
+	createCommand.StringVarP(&region, "region", "r", endpoints.UsWest2RegionID, "Name of the aws region.")
 
 	// build command
 	buildCommand = flag.NewFlagSet("build", flag.ExitOnError)
+	buildCommand.StringVarP(&path, "path", "p", ".", "Project Location.")
 
 	// deploy command
 	deployCommand = flag.NewFlagSet("deploy", flag.ExitOnError)
+	deployCommand.StringVarP(&path, "path", "p", ".", "Project Location.")
 }
 
 

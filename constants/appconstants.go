@@ -4,6 +4,9 @@ package constants
 const CONFIG_FILE_PERMISSIONS = 0777
 const REPO = "https://github.com/chaitanya11/BodylessCMS"
 const S3_INDEX_PAGE = "index.html"
+const S3_STYLE_PAGE = "style.css"
+const S3_IMG_FILE = "cow.png"
+const S3_IMG_PATH = "content/img/"
 
 
 
@@ -25,6 +28,7 @@ export class Config {
     public static readonly clientId = '{{.ClientId}}';
     public static readonly identityPoolId = '{{.IdentityPoolId}}';
     public static readonly awsRegion = '{{.AwsRegion}}';
+	public static readonly bucketname = '{{.BucketName}}';
 }
 `
 const AUTHENTICATED_USER_ROLE_TRUST_POLICY_TEMPLATE = `{
@@ -81,6 +85,19 @@ const AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
   ]
 }`
 
+const PUBLIC_BUCKET_POLICY_TEMPLATE = `{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::{{.BucketName}}/*"
+        }
+    ]
+}`
+
 
 const UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
   "Version": "2012-10-17",
@@ -100,6 +117,7 @@ const UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
 
 // structs
 type PROJECT_CONF_TEMPLATE_VARS struct {
+	BucketName string
 	UserPoolId string
 	ClientId string
 	IdentityPoolId string
@@ -107,9 +125,16 @@ type PROJECT_CONF_TEMPLATE_VARS struct {
 	ValidRoleArn string
 	InValidRoleArn string
 }
+type BodylessProjectConfig struct {
+	BucketName string
+	Region string
+	Profile string
+	CognitoConfig PROJECT_CONF_TEMPLATE_VARS
+}
 
 
 // file paths
 const CONFIG_DIR = ".bodyless-config"
 const CONFIG_FILE_NAME = "config.json"
 const PROJECT_CONFIG_PATH = "src/app/aws-services/config/index.ts";
+const BUILD_FILES_PATH = "dist/BodylessCMS/"

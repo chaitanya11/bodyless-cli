@@ -6,6 +6,8 @@ import (
 	"text/template"
 	"bytes"
 	"log"
+	"os/exec"
+	"strings"
 )
 
 func CheckNExitError(err error) {
@@ -15,14 +17,17 @@ func CheckNExitError(err error) {
 	}
 }
 
-func WriteProjectConfig(userPoolId *string,
+func WriteProjectConfig(bucketName *string,
+	userPoolId *string,
 	clientId *string,
 	identityPoolId *string,
 	awsRegion *string,
 	path *string,
 	validRoleArn *string,
 	invalidRoleArn *string) constants.PROJECT_CONF_TEMPLATE_VARS {
-	templateVars := constants.PROJECT_CONF_TEMPLATE_VARS{UserPoolId: *userPoolId,
+	templateVars := constants.PROJECT_CONF_TEMPLATE_VARS{
+		BucketName: *bucketName,
+		UserPoolId: *userPoolId,
 		ClientId: *clientId,
 		IdentityPoolId: *identityPoolId,
 		AwsRegion: *awsRegion,
@@ -55,4 +60,26 @@ func GetStringFromTemplate(templateValue string, strcuture interface{}) string{
 	CheckNExitError(exeErr)
 	log.Println("Rosolved template")
 	return data.String()
+}
+
+func ExecuteCmd(executionDir string,name string, args ...string) {
+	log.Printf("Executing %s in directory %s ...", name + " " + strings.Join(args, " "), executionDir)
+	cmd := exec.Command("npm", args...)
+	cmd.Dir = executionDir
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+	log.Printf("Executing %s in directory %s is completed", name + " " + strings.Join(args, " "), executionDir)
+}
+
+
+func IsDirectory(path string) bool {
+	fd, err := os.Stat(path)
+	CheckNExitError(err)
+	switch mode := fd.Mode(); {
+	case mode.IsDir():
+		return true
+	case mode.IsRegular():
+		return false
+	}
+	return false
 }
