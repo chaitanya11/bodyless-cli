@@ -40,6 +40,7 @@ func ReadConfig(path *string) constants.BodylessProjectConfig {
 	bodylessProjectConfig := constants.BodylessProjectConfig{}
 	err := decoder.Decode(&bodylessProjectConfig)
 	utils.CheckNExitError(err)
+	log.Printf("Project configuration %+v", bodylessProjectConfig)
 	return bodylessProjectConfig
 }
 
