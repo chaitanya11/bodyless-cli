@@ -35,6 +35,9 @@ build
 deploy
   -p, --path string
     	Project Location. (default ".")
+remove
+  -p, --path string
+    	Project Location. (default ".")
 ```
 
 
@@ -42,6 +45,11 @@ deploy
 ### To create project.
 ```
 bodyless create -w bodyless -P /tmp/ -N shadow -p default
+```
+
+### To remove all created aws resources and project
+```
+bodyless remove -p /tmp/shadow/
 ```
 
 If you want to do any customisation to [bodylesscms]("https://github.com/chaitanya11/BodylessCMS/"), go to the given path in create command and do necessary changes and to build or deploy follow these steps.
