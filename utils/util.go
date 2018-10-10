@@ -83,3 +83,10 @@ func IsDirectory(path string) bool {
 	}
 	return false
 }
+
+func RemoveDirectory(path string) {
+	log.Printf("Removing directory %s ...", path)
+	err := os.RemoveAll(path)
+	CheckNExitError(err)
+	log.Printf("Removed directory %s.", path)
+}

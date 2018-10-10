@@ -59,7 +59,8 @@ func CreateBucket(bucketName string,
 	setPublicBucketPolicy(&bucketName, svc)
 
 	// enable versioning on s3 bucket
-	enableBucketVersioning(&bucketName, svc)
+	// TODO fix multi version delete objects.
+	//enableBucketVersioning(&bucketName, svc)
 
 	// create cors config
 	createCorsConfig(&bucketName, svc)
@@ -219,6 +220,20 @@ func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string, r
 
 	log.Printf("Successfully set bucket %q website configuration\n", bucketName)
 
+}
+
+func DeleteBucket(bucketName *string, region *string) {
+	EmptyBucket(bucketName, region)
+	log.Printf("Deleting %s bucket ...", *bucketName)
+	svc := s3.New(session.New(&aws.Config{
+		Region: region,
+	}))
+	input := &s3.DeleteBucketInput{
+		Bucket: bucketName,
+	}
+	_, err := svc.DeleteBucket(input)
+	utils.CheckNExitError(err)
+	log.Printf("Deleted %s bucket.", *bucketName)
 }
 
 func EmptyBucket(bucketName *string, region *string) {

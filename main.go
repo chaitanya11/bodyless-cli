@@ -8,6 +8,7 @@ import (
 	"bodyless-cli/deploy-project"
 	"bodyless-cli/build-project"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
+	"bodyless-cli/remove-project"
 )
 
 var (
@@ -19,10 +20,10 @@ var (
 	createCommand *flag.FlagSet
 	buildCommand  *flag.FlagSet
 	deployCommand *flag.FlagSet
+	removeCommand *flag.FlagSet
 )
 
 func main() {
-	// TODO add remove resources command to remove all created aws resources.
 	commands := []*flag.FlagSet{
 		createCommand,
 		buildCommand,
@@ -54,6 +55,11 @@ func main() {
 		// deploy project.
 		deploy_project.DeployProj(path)
 
+	case "remove":
+		removeCommand.Parse(os.Args[2:])
+		// remove project.
+		remove_project.RemoveResources(path)
+
 	default:
 		printHelp(commands)
 		os.Exit(2)
@@ -84,6 +90,10 @@ func init() {
 	// deploy command
 	deployCommand = flag.NewFlagSet("deploy", flag.ExitOnError)
 	deployCommand.StringVarP(&path, "path", "p", ".", "Project Location.")
+
+	// remove command
+	removeCommand = flag.NewFlagSet("remove", flag.ExitOnError)
+	removeCommand.StringVarP(&path, "path", "p", ".", "Project Location.")
 }
 
 
@@ -100,4 +110,6 @@ func printHelp(commands []*flag.FlagSet) {
 	buildCommand.PrintDefaults()
 	fmt.Println("deploy")
 	deployCommand.PrintDefaults()
+	fmt.Println("remove")
+	removeCommand.PrintDefaults()
 }
