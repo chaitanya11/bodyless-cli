@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"bodyless-cli/constants"
 	"bodyless-cli/utils"
+	"log"
 )
 
 
@@ -32,12 +33,27 @@ func WriteConfig(
 	utils.CheckNExitError(fileWriteErr)
 }
 
-func ReadConfig() constants.BodylessProjectConfig {
-	file, _ := os.Open(constants.CONFIG_DIR + "/" + constants.CONFIG_FILE_NAME)
+func ReadConfig(path *string) constants.BodylessProjectConfig {
+	file, _ := os.Open(*path + constants.CONFIG_DIR + "/" + constants.CONFIG_FILE_NAME)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	bodylessProjectConfig := constants.BodylessProjectConfig{}
 	err := decoder.Decode(&bodylessProjectConfig)
 	utils.CheckNExitError(err)
 	return bodylessProjectConfig
+}
+
+func CheckConfigDir(path *string) bool {
+	log.Printf("checking %s directory for configuration ....", *path)
+	var result bool
+	_, err := os.Stat(*path)
+	if err == nil {
+			log.Printf("configuration found in %s directory.", *path)
+			result = true
+		}
+	if os.IsNotExist(err) {
+		log.Printf("configuration not found in %s directory.", *path)
+		result = false
+		}
+	return result
 }
