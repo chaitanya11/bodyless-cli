@@ -16,6 +16,7 @@ import (
 	"mime"
 	"path"
 	"strings"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 // aws s3
@@ -218,6 +219,28 @@ func SetWebSiteConfig(bucketName string, indexSuffix string, errorPage string, r
 
 	log.Printf("Successfully set bucket %q website configuration\n", bucketName)
 
+}
+
+func EmptyBucket(bucketName *string, region *string) {
+	log.Printf("Deleting all files in %s bucket ...", *bucketName)
+	sess, _ := session.NewSession(&aws.Config{
+		Region: region},
+	)
+
+	// Create S3 service client
+	svc := s3.New(sess)
+
+	// Setup BatchDeleteIterator to iterate through a list of objects.
+	iter := s3manager.NewDeleteListIterator(svc, &s3.ListObjectsInput{
+		Bucket: bucketName,
+	})
+
+	// Traverse iterator deleting each object
+	if err := s3manager.NewBatchDeleteWithClient(svc).Delete(aws.BackgroundContext(), iter); err != nil {
+		exitErrorf("Unable to delete objects from bucket %q, %v", bucketName, err)
+	}
+
+	log.Printf("Deleted object(s) from bucket: %s", *bucketName)
 }
 
 func exitErrorf(msg string, args ...interface{}) {

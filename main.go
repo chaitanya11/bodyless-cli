@@ -51,10 +51,8 @@ func main() {
 
 	case "deploy":
 		deployCommand.Parse(os.Args[2:])
-		// build project.
-		build_project.BuildProj(path)
 		// deploy project.
-		deploy_project.DeployProj()
+		deploy_project.DeployProj(path)
 
 	default:
 		printHelp(commands)
