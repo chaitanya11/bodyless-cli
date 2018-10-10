@@ -3,10 +3,10 @@ package create_project
 import (
 	"bodyless-cli/git"
 	"os"
-	"bodyless-cli/configuration"
 	"bodyless-cli/constants"
-	"bodyless-cli/aws"
 	"log"
+	"bodyless-cli/aws"
+	"bodyless-cli/configuration"
 )
 
 func CreateProj(projectName string,
@@ -29,15 +29,21 @@ func CreateProj(projectName string,
 	// create-project Code Bucket
 	aws.CreateBucket(codeBucket, &region)
 	aws.SetWebSiteConfig(codeBucket, constants.S3_INDEX_PAGE, constants.S3_INDEX_PAGE, &region)
+	aws.CreateDeploymentFiles(codeBucket, &region)
+
+	ngCodeBucket := "ng-"+codeBucket
+	aws.CreateBucket(ngCodeBucket, &region)
+	aws.SetWebSiteConfig(ngCodeBucket, constants.S3_INDEX_PAGE, constants.S3_INDEX_PAGE, &region)
 
 	// create cognito resources.
-	cognitoConfig := aws.CreateCognitoResources(constants.COGNITO_POOL_NAME, &path, &region)
+	cognitoConfig := aws.CreateCognitoResources(constants.COGNITO_POOL_NAME, &path, &region, &codeBucket)
 
 	// create configuration files.
 	log.Println("writing repo configuraton...")
-	path += "/"+constants.CONFIG_DIR
-	os.Mkdir(path, constants.CONFIG_FILE_PERMISSIONS);
-	filePath := path+"/"+constants.CONFIG_FILE_NAME
-	configuration.WriteConfig(codeBucket, region, profile, filePath,cognitoConfig)
+	configPath := path + "/"+constants.CONFIG_DIR
+	os.Mkdir(configPath, constants.CONFIG_FILE_PERMISSIONS);
+	filePath := configPath+"/"+constants.CONFIG_FILE_NAME
+	configuration.WriteConfig(codeBucket, region, profile, filePath, cognitoConfig)
+	aws.CreateNgCodeFiles(ngCodeBucket, &region, &path)
 	log.Println("writing repo configuration is completed.")
 }

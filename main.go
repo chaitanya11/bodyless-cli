@@ -7,6 +7,8 @@ import (
 	flag "github.com/ogier/pflag"
 	"bodyless-cli/deploy-project"
 	"bodyless-cli/build-project"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
+	"bodyless-cli/remove-project"
 )
 
 var (
@@ -18,10 +20,10 @@ var (
 	createCommand *flag.FlagSet
 	buildCommand  *flag.FlagSet
 	deployCommand *flag.FlagSet
+	removeCommand *flag.FlagSet
 )
 
 func main() {
-	// TODO add remove resources command to remove all created aws resources.
 	commands := []*flag.FlagSet{
 		createCommand,
 		buildCommand,
@@ -46,14 +48,17 @@ func main() {
 
 	case "build":
 		buildCommand.Parse(os.Args[2:])
-		build_project.BuildProj()
+		build_project.BuildProj(path)
 
 	case "deploy":
 		deployCommand.Parse(os.Args[2:])
-		// build project.
-		build_project.BuildProj()
 		// deploy project.
-		deploy_project.DeployProj()
+		deploy_project.DeployProj(path)
+
+	case "remove":
+		removeCommand.Parse(os.Args[2:])
+		// remove project.
+		remove_project.RemoveResources(path)
 
 	default:
 		printHelp(commands)
@@ -76,13 +81,19 @@ func init() {
 	createCommand.StringVarP(&path, "Path", "P", ".", "Project Location.")
 	createCommand.StringVarP(&codeBucket, "CodeBucketName", "w", "", "Name of the bucket where website code is deployed.")
 	createCommand.StringVarP(&profile, "profile", "p", "default", "Name of the aws profile configured.")
-	createCommand.StringVarP(&region, "region", "r", "us-east-1", "Name of the aws region.")
+	createCommand.StringVarP(&region, "region", "r", endpoints.UsWest2RegionID, "Name of the aws region.")
 
 	// build command
 	buildCommand = flag.NewFlagSet("build", flag.ExitOnError)
+	buildCommand.StringVarP(&path, "path", "p", ".", "Project Location.")
 
 	// deploy command
 	deployCommand = flag.NewFlagSet("deploy", flag.ExitOnError)
+	deployCommand.StringVarP(&path, "path", "p", ".", "Project Location.")
+
+	// remove command
+	removeCommand = flag.NewFlagSet("remove", flag.ExitOnError)
+	removeCommand.StringVarP(&path, "path", "p", ".", "Project Location.")
 }
 
 
@@ -99,4 +110,6 @@ func printHelp(commands []*flag.FlagSet) {
 	buildCommand.PrintDefaults()
 	fmt.Println("deploy")
 	deployCommand.PrintDefaults()
+	fmt.Println("remove")
+	removeCommand.PrintDefaults()
 }

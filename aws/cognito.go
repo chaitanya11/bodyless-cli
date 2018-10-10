@@ -7,7 +7,6 @@ import (
 	"bodyless-cli/utils"
 	"github.com/aws/aws-sdk-go/service/cognitoidentity"
 	"bodyless-cli/constants"
-	"github.com/aws/aws-sdk-go/service/iam"
 	"log"
 )
 
@@ -23,6 +22,18 @@ func createCognitoUserPool(poolName string, region *string) *string {
 	userPoolId := createUserPoolOutput.UserPool.Id;
 	log.Printf("Created cognito userpool. userpool id %s", *userPoolId)
 	return userPoolId
+}
+
+func DeleteCognitoPool(userPoolId *string, region *string) {
+	log.Printf("Deleting userpool %s ...", *userPoolId)
+	Cognitoidentityprovider := cognitoidentityprovider.New(session.New(&aws.Config{
+		Region: region,
+	}))
+	_,err := Cognitoidentityprovider.DeleteUserPool(&cognitoidentityprovider.DeleteUserPoolInput{
+		UserPoolId: userPoolId,
+	})
+	utils.CheckNExitError(err)
+	log.Printf("Deleted userpool %s.", *userPoolId)
 }
 
 func createUserPoolClient(
@@ -67,9 +78,8 @@ func createIdentityPool(poolName string, clientId *string, userPoolId string, re
 	IdentityPool, createPoolErr := CognitoIdentity.CreateIdentityPool(&createIdentityPoolInput)
 	utils.CheckNExitError(createPoolErr)
 	log.Printf("Created cognito identity pool, identity pool id %s", *IdentityPool.IdentityPoolId)
-	// TODO set roles with permissions for identity pool.
 	// get roles arns
-	validRole, invalidRole := createIamRoles(region, IdentityPool.IdentityPoolId);
+	validRole, invalidRole := CreateIamRoles(region, IdentityPool.IdentityPoolId);
 	log.Println("Attaching roles to identity pool ....")
 	_, setRolesErr := CognitoIdentity.SetIdentityPoolRoles(&cognitoidentity.SetIdentityPoolRolesInput{
 		IdentityPoolId: IdentityPool.IdentityPoolId,
@@ -83,86 +93,61 @@ func createIdentityPool(poolName string, clientId *string, userPoolId string, re
 	return IdentityPool.IdentityPoolId, validRole, invalidRole
 }
 
-func createIamRoles(region *string, identityPoolId *string) (*string, *string) {
-	Iam := iam.New(session.New(&aws.Config{
+func DeleteIdentityPool(identityPoolId *string, region *string) {
+	log.Printf("Deleting Identity pool %s ...", *identityPoolId)
+	CognitoIdentity := cognitoidentity.New(session.New(&aws.Config{
 		Region: region,
 	}))
-	log.Println("Creating roles for identity pool ...")
-	projectVars := constants.PROJECT_CONF_TEMPLATE_VARS{
-		IdentityPoolId: *identityPoolId,
-	}
-	// valid role.
-	validUserRoleDoc := utils.GetStringFromTemplate(constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_TEMPLATE,
-		projectVars)
-	validUserROleName := constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME
-	validUserROleDes := constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_DESCRIPTION
-	createValidUserRoleInput := iam.CreateRoleInput{
-		AssumeRolePolicyDocument: &validUserRoleDoc,
-		RoleName: &validUserROleName,
-		Description: &validUserROleDes}
-	createRoleOut, createValidUserRoleErr := Iam.CreateRole(&createValidUserRoleInput)
-	utils.CheckNExitError(createValidUserRoleErr)
-	validUserRoleArn := createRoleOut.Role.Arn
-	log.Printf("Created role for valid users, role arn %s", *validUserRoleArn)
-
-	// invalid role.
-	inValidUserRoleDoc := utils.GetStringFromTemplate(constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_TEMPLATE,
-		projectVars)
-	inValidUserROleName := constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME
-	inValidUserROleDes := constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_DESCRIPTION
-
-	createinValidUserRoleInput := iam.CreateRoleInput{
-		AssumeRolePolicyDocument: &inValidUserRoleDoc,
-		RoleName: &inValidUserROleName,
-		Description: &inValidUserROleDes}
-	createRoleOut, createinValidUserRoleErr := Iam.CreateRole(&createinValidUserRoleInput)
-	utils.CheckNExitError(createinValidUserRoleErr)
-	inValidUserRoleArn := createRoleOut.Role.Arn
-	log.Printf("Created role for invalid users, role arn %s", *inValidUserRoleArn)
-
-	// Adding policies to rolesAttaching roles to identity pool
-	attachPolicy(constants.AUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
-		region,
-		constants.AUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME,
-		constants.AUTHENTICATED_USER_ROLE_POLICY_NAME)
-	attachPolicy(constants.UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE,
-		region,
-		constants.UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_NAME,
-		constants.UNAUTHENTICATED_USER_ROLE_POLICY_NAME)
-	return validUserRoleArn, inValidUserRoleArn
+	_,err :=CognitoIdentity.DeleteIdentityPool(&cognitoidentity.DeleteIdentityPoolInput{
+		IdentityPoolId: identityPoolId,
+	})
+	utils.CheckNExitError(err)
+	log.Printf("Deleted Identity pool %s ...", *identityPoolId)
 }
 
-
-func attachPolicy(
-	policyTemplate string,
-	region *string,
-	roleName string,
-	policyName string) *iam.PutRolePolicyOutput {
-	log.Printf("Creating policy document for role %s ...", roleName)
-	svc := iam.New(session.New(&aws.Config{
+func createUser(region *string, userName string, password string, email string, userPoolId *string, clientId *string) {
+	log.Println("Creating user in cognito pool ...")
+	CognitoSvc := cognitoidentityprovider.New(session.New(&aws.Config{
 		Region: region,
 	}))
-
-	policyInput := iam.PutRolePolicyInput{RoleName: &roleName,
-	PolicyDocument: &policyTemplate,
-	PolicyName: &policyName,
+	attributeList := []*cognitoidentityprovider.AttributeType{
+		&cognitoidentityprovider.AttributeType{
+			Name: aws.String("email"),
+			Value: &email,
+		},
 	}
-	PutRolePolicyOutput, error := svc.PutRolePolicy(&policyInput)
-	utils.CheckNExitError(error)
-	log.Printf("Created policy document for role %s ...", roleName)
-	return PutRolePolicyOutput
+	_, userCreateErr := CognitoSvc.SignUp(&cognitoidentityprovider.SignUpInput{
+		Username: &userName,
+		Password: &password,
+		UserAttributes: attributeList,
+		ClientId: clientId,
+	})
+	utils.CheckNExitError(userCreateErr)
+	log.Printf("User created with details, username : %s, password: %s, email: %s.",
+		userName, password, email)
+	log.Println("Use username and password to login to application.")
+
+	// confirm created user.
+	_, userCnfmErr := CognitoSvc.AdminConfirmSignUp(&cognitoidentityprovider.AdminConfirmSignUpInput{
+		Username: &userName,
+		UserPoolId: userPoolId,
+	})
+	utils.CheckNExitError(userCnfmErr)
 }
 
-func CreateCognitoResources(poolName string, path *string, region *string) constants.PROJECT_CONF_TEMPLATE_VARS {
+func CreateCognitoResources(poolName string, path *string, region *string, bucketName *string) constants.PROJECT_CONF_TEMPLATE_VARS {
 	log.Println("Creating cognito resources ...")
 	userPoolId := createCognitoUserPool(poolName, region)
 	// create user pool client.
 	createUserPoolClientOutput := createUserPoolClient(poolName, userPoolId, region)
 	clientId := createUserPoolClientOutput.UserPoolClient.ClientId
 	IdentityPoolId, validRoleArn, inValidRoleArn := createIdentityPool(poolName, clientId, *userPoolId, region)
+	// creating user in cognito pool.
+	createUser(region, "bodyless", "Hello@1234", "bodylesscms@mailinator.com", userPoolId, clientId)
+
 	// write to config file of project.
 	log.Println("Writing project configuration ...")
-	cognitoConfig := utils.WriteProjectConfig(userPoolId, clientId, IdentityPoolId, region, path,
+	cognitoConfig := utils.WriteProjectConfig(bucketName, userPoolId, clientId, IdentityPoolId, region, path,
 		validRoleArn, inValidRoleArn)
 	return cognitoConfig
 }

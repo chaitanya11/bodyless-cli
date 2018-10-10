@@ -6,14 +6,10 @@ import (
 	"io/ioutil"
 	"bodyless-cli/constants"
 	"bodyless-cli/utils"
+	"log"
 )
 
-type BodylessProjectConfig struct {
-	BucketName string
-	Region string
-	Profile string
-	CognitoConfig constants.PROJECT_CONF_TEMPLATE_VARS
-}
+
 
 
 func WriteConfig(
@@ -22,7 +18,7 @@ func WriteConfig(
 	awsProfile string,
 	fileName string,
 	cognitoConfig constants.PROJECT_CONF_TEMPLATE_VARS) {
-	bodylessProjectConfig := BodylessProjectConfig{BucketName:bucketName,
+	bodylessProjectConfig := constants.BodylessProjectConfig{BucketName:bucketName,
 		Region:awsRegion,
 		Profile:awsProfile,
 		CognitoConfig:cognitoConfig}
@@ -37,12 +33,28 @@ func WriteConfig(
 	utils.CheckNExitError(fileWriteErr)
 }
 
-func ReadConfig() BodylessProjectConfig {
-	file, _ := os.Open(constants.CONFIG_DIR + "/" + constants.CONFIG_FILE_NAME)
+func ReadConfig(path *string) constants.BodylessProjectConfig {
+	file, _ := os.Open(*path + constants.CONFIG_DIR + "/" + constants.CONFIG_FILE_NAME)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	bodylessProjectConfig := BodylessProjectConfig{}
+	bodylessProjectConfig := constants.BodylessProjectConfig{}
 	err := decoder.Decode(&bodylessProjectConfig)
 	utils.CheckNExitError(err)
+	log.Printf("Project configuration %+v", bodylessProjectConfig)
 	return bodylessProjectConfig
+}
+
+func CheckConfigDir(path *string) bool {
+	log.Printf("checking %s directory for configuration ....", *path)
+	var result bool
+	_, err := os.Stat(*path)
+	if err == nil {
+			log.Printf("configuration found in %s directory.", *path)
+			result = true
+		}
+	if os.IsNotExist(err) {
+		log.Printf("configuration not found in %s directory.", *path)
+		result = false
+		}
+	return result
 }

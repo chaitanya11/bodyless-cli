@@ -1,6 +1,6 @@
-# bodyless
+# Bodyless-cli
 
-Bodyless is cli (command line user interface for [BodylessCMS](https://github.com/chaitanya11/BodylessCMS/). we can create, build, and deploy BodylessCMS project with this cli. This is writen in go.
+Bodyless is cli (command line user interface for [BodylessCMS]("https://github.com/chaitanya11/BodylessCMS/")). we can create, build, and deploy BodylessCMS project with this cli. This is writen in go.
 
 
 ## How to Install
@@ -30,7 +30,14 @@ create
   -r, --region string
     	Name of the aws region. (default "us-west-2")
 build
+  -p, --path string
+    	Project Location. (default ".")
 deploy
+  -p, --path string
+    	Project Location. (default ".")
+remove
+  -p, --path string
+    	Project Location. (default ".")
 ```
 
 
@@ -38,4 +45,25 @@ deploy
 ### To create project.
 ```
 bodyless create -w bodyless -P /tmp/ -N shadow -p default
+```
+
+### To remove all created aws resources and project
+```
+bodyless remove -p /tmp/shadow/
+```
+
+If you want to do any customisation to [bodylesscms]("https://github.com/chaitanya11/BodylessCMS/"), go to the given path in create command and do necessary changes and to build or deploy follow these steps.
+
+
+### To build [bodylesscms]("https://github.com/chaitanya11/BodylessCMS/") project (after any customisations)
+
+```
+bodyless build -p /tmp/shadow/
+```
+
+
+### To deploy [bodylesscms]("https://github.com/chaitanya11/BodylessCMS/") project (after any customisations)
+
+```
+bodyless deploy -p /tmp/shadow/
 ```
