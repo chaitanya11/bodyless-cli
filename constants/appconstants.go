@@ -7,6 +7,7 @@ const S3_INDEX_PAGE = "index.html"
 const S3_STYLE_PAGE = "style.css"
 const S3_IMG_FILE = "cow.png"
 const S3_IMG_PATH = "content/img/"
+const ASSESTS = "assets"
 
 
 
