@@ -158,8 +158,9 @@ func uploadDirToS3(bucketName string, region *string, dirPath string) {
 
 	for _, file := range fileList {
 		fileName := filepath.Base(file)
-		if strings.Contains(file, "assets") {
-			fileName = "assets/" + fileName
+		if strings.Contains(file, constants.ASSESTS) {
+			assetIndex := strings.Index(file, constants.ASSESTS)
+			fileName = file[assetIndex:]
 		}
 		uploadFile(&bucketName, region, &fileName, file)
 	}
