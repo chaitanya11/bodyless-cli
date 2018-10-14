@@ -137,5 +137,5 @@ type BodylessProjectConfig struct {
 // file paths
 const CONFIG_DIR = ".bodyless-config"
 const CONFIG_FILE_NAME = "config.json"
-const PROJECT_CONFIG_PATH = "src/app/aws-services/config/index.ts";
+const PROJECT_CONFIG_PATH = "src/app/services/aws/config/index.ts";
 const BUILD_FILES_PATH = "dist/BodylessCMS/"
