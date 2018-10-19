@@ -23,13 +23,13 @@ const UNAUTHENTICATED_USER_ROLE_POLICY_NAME = "Cognito_bodylesscms_identity_pool
 const UNAUTHENTICATED_USER_ROLE_TRUST_POLICY_DESCRIPTION = "This role is applied for unAuthenticated users from cognito."
 
 // templates
-const PROJECT_CONF_TEMPLATE = `
-export class Config {
+const PROJECT_CONF_TEMPLATE = `export class Config {
     public static readonly userPoolId= '{{.UserPoolId}}';
     public static readonly clientId = '{{.ClientId}}';
     public static readonly identityPoolId = '{{.IdentityPoolId}}';
     public static readonly awsRegion = '{{.AwsRegion}}';
-	public static readonly bucketname = '{{.BucketName}}';
+    public static readonly bucketname = '{{.BucketName}}';
+    public static readonly projectName = '{{.ProjectName}}';
 }
 `
 const AUTHENTICATED_USER_ROLE_TRUST_POLICY_TEMPLATE = `{
@@ -119,6 +119,7 @@ const UNAUTHENTICATED_USER_ROLE_POLICY_TEMPLATE = `{
 // structs
 type PROJECT_CONF_TEMPLATE_VARS struct {
 	BucketName string
+	ProjectName string
 	UserPoolId string
 	ClientId string
 	IdentityPoolId string
