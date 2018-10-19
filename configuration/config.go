@@ -28,7 +28,7 @@ func WriteConfig(
 	utils.CheckNExitError(jsonErr)
 
 	// write data to file
-	fileWriteErr := ioutil.WriteFile(fileName, b, constants.CONFIG_FILE_PERMISSIONS);
+	fileWriteErr := ioutil.WriteFile(fileName, b, constants.CONFIG_FILE_PERMISSIONS)
 
 	utils.CheckNExitError(fileWriteErr)
 }

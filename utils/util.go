@@ -24,9 +24,11 @@ func WriteProjectConfig(bucketName *string,
 	awsRegion *string,
 	path *string,
 	validRoleArn *string,
-	invalidRoleArn *string) constants.PROJECT_CONF_TEMPLATE_VARS {
+	invalidRoleArn *string,
+	projectName *string) constants.PROJECT_CONF_TEMPLATE_VARS {
 	templateVars := constants.PROJECT_CONF_TEMPLATE_VARS{
 		BucketName: *bucketName,
+		ProjectName: *projectName,
 		UserPoolId: *userPoolId,
 		ClientId: *clientId,
 		IdentityPoolId: *identityPoolId,
@@ -40,6 +42,8 @@ func WriteProjectConfig(bucketName *string,
 	log.Println("Opening config file")
 	configFile, configFileReadErr := os.OpenFile(*path + "/" +constants.PROJECT_CONFIG_PATH,
 		os.O_RDWR, os.ModePerm)
+	configFile.Truncate(0)
+	configFile.Seek(0,0)
 	CheckNExitError(configFileReadErr)
 	log.Println("Writing data to config file")
 	exeErr := template.Execute(configFile, templateVars)
@@ -67,6 +71,7 @@ func ExecuteCmd(executionDir string,name string, args ...string) {
 	cmd := exec.Command("npm", args...)
 	cmd.Dir = executionDir
 	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	cmd.Run()
 	log.Printf("Executing %s in directory %s is completed", name + " " + strings.Join(args, " "), executionDir)
 }
