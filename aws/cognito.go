@@ -135,7 +135,11 @@ func createUser(region *string, userName string, password string, email string, 
 	utils.CheckNExitError(userCnfmErr)
 }
 
-func CreateCognitoResources(poolName string, path *string, region *string, bucketName *string) constants.PROJECT_CONF_TEMPLATE_VARS {
+func CreateCognitoResources(poolName string,
+	path *string,
+	region *string,
+	bucketName *string,
+	projectName *string) constants.PROJECT_CONF_TEMPLATE_VARS {
 	log.Println("Creating cognito resources ...")
 	userPoolId := createCognitoUserPool(poolName, region)
 	// create user pool client.
@@ -148,6 +152,6 @@ func CreateCognitoResources(poolName string, path *string, region *string, bucke
 	// write to config file of project.
 	log.Println("Writing project configuration ...")
 	cognitoConfig := utils.WriteProjectConfig(bucketName, userPoolId, clientId, IdentityPoolId, region, path,
-		validRoleArn, inValidRoleArn)
+		validRoleArn, inValidRoleArn, projectName)
 	return cognitoConfig
 }

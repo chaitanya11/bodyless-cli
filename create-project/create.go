@@ -36,7 +36,8 @@ func CreateProj(projectName string,
 	aws.SetWebSiteConfig(ngCodeBucket, constants.S3_INDEX_PAGE, constants.S3_INDEX_PAGE, &region)
 
 	// create cognito resources.
-	cognitoConfig := aws.CreateCognitoResources(constants.COGNITO_POOL_NAME, &path, &region, &codeBucket)
+	cognitoConfig := aws.CreateCognitoResources(constants.COGNITO_POOL_NAME,
+		&path, &region, &codeBucket, &projectName)
 
 	// create configuration files.
 	log.Println("writing repo configuraton...")
